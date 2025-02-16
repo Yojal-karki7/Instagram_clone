@@ -30,7 +30,7 @@ const Login = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:3000/api/v1/user/login",
+        "https://instagram-clone-backend-ivory.vercel.app/api/v1/user/login",
         input,
         {
           withCredentials: true,

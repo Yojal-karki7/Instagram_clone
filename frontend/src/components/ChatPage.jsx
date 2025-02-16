@@ -38,7 +38,7 @@ const ChatPage = () => {
 
   const handleFollowingUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/v1/user/following', { withCredentials: true });
+      const response = await axios.get('https://instagram-clone-backend-ivory.vercel.app/api/v1/user/following', { withCredentials: true });
       if (response.data.success) {
         setFollowingUsers(response.data.following);
       }

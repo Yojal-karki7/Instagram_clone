@@ -8,7 +8,7 @@ const useGetSuggestedUsers = () => {
     useEffect(()=>{
         const fetchSuggestedUsers = async() => {
             try {
-            const response = await axios.get('http://localhost:3000/api/v1/user/suggested', {withCredentials:true});
+            const response = await axios.get('https://instagram-clone-backend-ivory.vercel.app/api/v1/user/suggested', {withCredentials:true});
                 if(response.data.success) {
                     dispatch(setSuggestedUser(response.data.suggestedUsers));
                 }

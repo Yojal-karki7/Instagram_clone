@@ -8,7 +8,7 @@ const useGetUserProfile = (userId) => {
     useEffect(()=>{
         const fetchUserProfile = async() => {
             try {
-            const response = await axios.get(`http://localhost:3000/api/v1/user/${userId}/profile`, {withCredentials:true});
+            const response = await axios.get(`https://instagram-clone-backend-ivory.vercel.app/api/v1/user/${userId}/profile`, {withCredentials:true});
                 if(response.data.success) {
                     dispatch(setUserProfile(response.data.user));
                 }

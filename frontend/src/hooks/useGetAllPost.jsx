@@ -8,7 +8,7 @@ const useGetAllPost = () => {
     useEffect(()=>{
         const fetchAllPost = async() => {
             try {
-                const response = await axios.get("http://localhost:3000/api/v1/post/all", {withCredentials:true});
+                const response = await axios.get("https://instagram-clone-backend-ivory.vercel.app/api/v1/post/all", {withCredentials:true});
 
                 if(response.data.success) {
                     dispatch(setPosts(response.data.posts));
