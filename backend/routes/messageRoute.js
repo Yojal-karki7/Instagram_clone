@@ -5,6 +5,6 @@ import { getMessage, sendMessage } from '../controllers/messageController.js';
 const router = express.Router();
 
 router.post('/send/:id', isAuthenticated, sendMessage)
-router.post('/all/:id', isAuthenticated, getMessage)
+router.get('/all/:id', isAuthenticated, getMessage)
 
 export default router;

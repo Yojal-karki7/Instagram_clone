@@ -6,9 +6,10 @@ import connectDB from './utils/db.js';
 import userRoute from './routes/userRoute.js'
 import messageRoute from './routes/messageRoute.js'
 import postRoute from './routes/postRoute.js'
+import storyRoute from './routes/storyRoutes.js'
+import { app, server } from './socket.io/socket.js'
 
 dotenv.config({});
-const app = express();
 const PORT = process.env.PORT || 3000;
 
 
@@ -33,8 +34,9 @@ app.use(cors({
 app.use('/api/v1/user', userRoute);
 app.use('/api/v1/post', postRoute);
 app.use('/api/v1/message', messageRoute);
+app.use('/api/v1/story', storyRoute);
 
-app.listen(PORT, ()=>{
+server.listen(PORT, ()=>{
     connectDB()
     console.log(`Server listening at port: ${PORT}`);
 })

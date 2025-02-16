@@ -109,7 +109,11 @@ export const getProfile = async (req, res)=>{
     try {
         const userId = req.params.id;
 
-        let user = await User.findById(userId).select("-password");
+        let user = await User.findById(userId).populate({
+            path: 'posts', createdAt: -1
+        }).populate(
+            'bookmarks'
+        );
         return res.status(200).json({
             user,
             success: true,
@@ -172,50 +176,68 @@ export const getSuggestedUsers = async (req, res) => {
     }
 }
 
-export const followOrUnfollow = async(req, res) => {
+export const followOrUnfollow = async (req, res) => {
     try {
-         const follower = req.id;   // current user   
-         const following = req.params.id;
-         if(follower === following) {
-            return res.status(400).json({
-                message: 'You cannot follow your self!',
-                success: true,
-            })
-         }
-         const user = await User.findById(follower);
-         const targetUser = await User.findById(following);
+        const follower = req.id;
+        const following = req.params.id;
 
-         if(!user || !targetUser) {
+        if (follower === following) {
+            return res.status(400).json({
+                message: 'You cannot follow yourself!',
+                success: false,
+            });
+        }
+
+        const user = await User.findById(follower);
+        const targetUser = await User.findById(following);
+
+        if (!user || !targetUser) {
             return res.status(400).json({
                 message: 'User not found!',
                 success: false,
-            })
-         }
-        //  Now check whether to follow or unfollow
+            });
+        }
+
         const isFollowing = user.following.includes(following);
-        if(isFollowing) {
-            // unfollow logic
+
+        if (isFollowing) {
             await Promise.all([
-            User.updateOne({_id: follower}, {$pull:{following:following}}),
-            User.updateOne({_id: following}, {$pull:{followers:follower}}),
-            ])
-            return res.status(200).json({
-                message: 'Unfollowed Successfully!',
-                success: true,
-            })
-        }
-        else {
-            // follow logic
+                User.updateOne({ _id: follower }, { $pull: { following: following } }),
+                User.updateOne({ _id: following }, { $pull: { followers: follower } }),
+            ]);
+        } else {
             await Promise.all([
-                User.updateOne({_id: follower}, {$push:{following:following}}),
-                User.updateOne({_id: following}, {$push:{followers:follower}}),
-            ])
-            return res.status(200).json({
-                message: 'Followed Successfully!',
-                success: true,
-            })
+                User.updateOne({ _id: follower }, { $push: { following: following } }),
+                User.updateOne({ _id: following }, { $push: { followers: follower } }),
+            ]);
         }
+
+        // Fetch updated user with populated following
+        const updatedUser = await User.findById(follower).populate("following", "username profilePicture");
+
+        return res.status(200).json({
+            message: isFollowing ? 'Unfollowed Successfully!' : 'Followed Successfully!',
+            success: true,
+            following: updatedUser.following, // ✅ Send updated following list
+        });
+
     } catch (error) {
         console.log(error);
+        res.status(500).json({ message: "Something went wrong", success: false });
     }
-}
+};
+
+export const getFollowingUsers = async (req, res) => {
+    try {
+      const user = await User.findById(req.id).populate("following", "username profilePicture");
+  
+      if (!user) {
+        return res.status(404).json({ message: "User not found", success: false });
+      }
+  
+      res.status(200).json({ success: true, following: user.following });
+    } catch (error) {
+      console.error("Error fetching following users:", error);
+      res.status(500).json({ message: "Something went wrong", success: false });
+    }
+  };
