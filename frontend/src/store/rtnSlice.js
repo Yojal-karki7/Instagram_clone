@@ -1,29 +1,41 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const rtnSlice = createSlice({
-    name: 'realTimeNotification',
+    name: "realTimeNotification",
     initialState: {
         likeNotification: [],
         messageNotification: [],
     },
     reducers: {
         setLikeNotification(state, action) {
-            if(action.payload.type === 'like') {
+            if (action.payload.type === "like") {
                 state.likeNotification.push(action.payload);
-            } else if(action.payload.type === 'dislike') {
-                state.likeNotification = state.likeNotification.filter((item) => item.userId !== action.payload.userId)
+            } else if (action.payload.type === "dislike") {
+                state.likeNotification = state.likeNotification.filter(
+                    (item) => item.userId !== action.payload.userId
+                );
             }
         },
-        setMessageNotification(state, action) {
-                // ✅ Ensure messageNotification is always an array
-                if (!state.messageNotification) {
-                  state.messageNotification = [];
-                }
-                state.messageNotification.push(action.payload);
-              },
-        }
-    }
-);
+        setMessageNotification: (state, action) => {
+            if (!state.messageNotification) {
+                state.messageNotification = [];
+            }
 
-export const {setLikeNotification, setMessageNotification} = rtnSlice.actions;
+            // ✅ Remove objects that only contain "count"
+            const filteredMessages = Array.isArray(action.payload)
+                ? action.payload.filter((msg) => msg.type === "message")
+                : action.payload.type === "message"
+                ? [action.payload]
+                : [];
+
+            state.messageNotification.push(...filteredMessages);
+        },
+        clearNotifications: (state) => {
+            state.likeNotification = [];
+            state.messageNotification = [];
+        },
+    },
+});
+
+export const { setLikeNotification, setMessageNotification, clearNotifications } = rtnSlice.actions;
 export default rtnSlice.reducer;

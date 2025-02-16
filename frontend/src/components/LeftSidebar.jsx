@@ -18,14 +18,23 @@ import CreatePost from "./CreatePost";
 import { setPosts, setSelectedPost } from "@/store/postSlice";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
+import { clearNotifications } from "@/store/rtnSlice";
 
 const LeftSidebar = () => {
   const navigate = useNavigate();
   const { user } = useSelector((store) => store.auth);
-  const { likeNotification, messageNotification } = useSelector(
+  const { likeNotification } = useSelector(
     (store) => store.realTimeNotification
+  ) || [];
+  const messageNotification = useSelector(
+    (state) => state.realTimeNotification.messageNotification.filter(noti => noti.type) // ✅ Filter out non-message objects
+  ) || [];
+  console.log("Like Notifications:", JSON.stringify(likeNotification, null, 2));
+  console.log(
+    "Message Notifications:",
+    JSON.stringify(messageNotification, null, 2)
   );
-  
+
   const dispatch = useDispatch();
   const [openCreatePost, setOpenCreatePost] = useState(false);
 
@@ -102,6 +111,9 @@ const LeftSidebar = () => {
       text: "Logout",
     },
   ];
+  const handleClearNotifications = () => {
+    dispatch(clearNotifications());
+  };
   return (
     <div className="fixed px-4 top-0 z-10 left-0 border-r border-gray-300 hidden sm:block md:w-[20%] h-screen">
       <div className="flex flex-col">
@@ -116,8 +128,7 @@ const LeftSidebar = () => {
               >
                 {item.icon}
                 <span>{item.text}</span>
-                {item.text === "Notifications" &&
-                  likeNotification.length > 0 && (
+                {item.text === "Notifications" && likeNotification?.length > 0 && (
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -128,6 +139,14 @@ const LeftSidebar = () => {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent>
+                        <div>
+                          <button
+                            onClick={handleClearNotifications}
+                            className="p-2 bg-red-500 text-white rounded w-full text-center mb-2"
+                          >
+                            Clear Notifications
+                          </button>
+                        </div>
                         <div>
                           {likeNotification.length === 0 ? (
                             <p>No new notification</p>
@@ -160,48 +179,51 @@ const LeftSidebar = () => {
                       </PopoverContent>
                     </Popover>
                   )}
-                { item.text === 'Messages' && messageNotification?.length > 0 && (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        size="icon"
-                        className="rounded-full h-5 w-5 bg-blue-600 hover:bg-blue-600 absolute bottom-6 left-6"
-                      >
-                        {messageNotification.length}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <div>
-                        {messageNotification.length === 0 ? (
-                          <p>No new messages</p>
-                        ) : (
-                          messageNotification?.map((notification) => (
-                            <div
-                              key={notification.userId}
-                              className="flex items-center gap-2 my-2"
-                            >
-                              <Avatar>
-                                <AvatarImage
-                                  src={notification.userDetails?.profilePicture}
-                                />
-                                <AvatarFallback>CN</AvatarFallback>
-                              </Avatar>
-                              <p className="text-sm">
-                                <span className="font-bold">
-                                  {notification.userDetails?.username}
-                                </span>
-                                :{" "}
-                                {notification.text.length > 20
-                                  ? notification.text.slice(0, 20) + "..."
-                                  : notification.text}
-                              </p>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                )}
+                {item.text === "Messages" &&
+                  messageNotification?.length > 0 && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          size="icon"
+                          className="rounded-full h-5 w-5 bg-blue-600 hover:bg-blue-600 absolute bottom-6 left-6"
+                        >
+                          {messageNotification.length}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        <div>
+                          {messageNotification.length === 0 ? (
+                            <p>No new messages</p>
+                          ) : (
+                            messageNotification?.map((notification) => (
+                              <div
+                                key={notification.userId}
+                                className="flex items-center gap-2 my-2"
+                              >
+                                <Avatar>
+                                  <AvatarImage
+                                    src={
+                                      notification.userDetails?.profilePicture
+                                    }
+                                  />
+                                  <AvatarFallback>CN</AvatarFallback>
+                                </Avatar>
+                                <p className="text-sm">
+                                  <span className="font-bold">
+                                    {notification.userDetails?.username}
+                                  </span>
+                                  :{" "}
+                                  {notification.text.length > 20
+                                    ? notification.text.slice(0, 20) + "..."
+                                    : notification.text}
+                                </p>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
               </div>
             );
           })}

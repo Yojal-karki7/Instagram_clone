@@ -33,10 +33,10 @@ export const sendMessage = async(req, res) => {
 
         // implement socket.io for real time data transfer
         const receiverSocketId = getReceiverSocketId(receiverId);
+        console.log("Receiver Socket ID:", receiverSocketId);
         if(receiverSocketId) {
             io.to(receiverSocketId).emit('newMessage', newMessage);
         
-
         const sender = await User.findById(senderId).select("username profilePicture");
 
         // Create a message notification object
@@ -51,10 +51,9 @@ export const sendMessage = async(req, res) => {
         };
 
         // Emit real-time message notification
+        console.log("Emitting messageNotification to:", receiverSocketId, notification);
         io.to(receiverSocketId).emit("messageNotification", notification);
     }
-
-        
         return res.status(200).json({
             success: true,
             newMessage

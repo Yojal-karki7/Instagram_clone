@@ -76,11 +76,14 @@ function App() {
       })
       socketio.on('messageNotification', (messageNotification) => {
         console.log(messageNotification);
+        
         dispatch(setMessageNotification(messageNotification));
       })
       return () => {
-        socket.close();
-        dispatch(setSocket(null));
+        if (socket) {
+          socket.close();
+          dispatch(setSocket(null));
+        }
       };
     } else if(socket) {
       socket.close();
