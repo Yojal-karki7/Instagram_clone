@@ -14,7 +14,7 @@ router.get('/:id/dislike',isAuthenticated, disLikedPost)
 router.post('/:id/comment',isAuthenticated, addComment)
 router.post('/:id/comment/all',isAuthenticated, getPostComment)
 router.delete('/delete/:id',isAuthenticated, deletePost)
-router.post('/:id/bookmark',isAuthenticated, bookmarkPost)
+router.get('/:id/bookmark',isAuthenticated, bookmarkPost)
 
 
 export default router

@@ -21,6 +21,7 @@ const Post = ({ post }) => {
   const [liked, setLiked] = useState(post.likes.includes(user._id) || false);
   const [postLike, setPostLike] = useState(post.likes.length);
   const [comment, setComment] = useState(post.comments);
+  
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -50,6 +51,17 @@ const Post = ({ post }) => {
       setText("");
     }
   };
+
+  const handleBookmark = async () => {
+    try {
+      const res = await axios.get(`http://localhost:3000/api/v1/post/${post?._id}/bookmark`, {withCredentials: true});
+      if(res.data.success) {
+        toast.success(res.data.message)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   const handleLikeOrDislike = async () => {
     try {
       const action = liked ? "dislike" : "like";
@@ -120,7 +132,7 @@ const Post = ({ post }) => {
       });
   };
   return (
-    <div className="my-8 w-full max-w-sm lg:max-w-md xl:max-w-lg">
+    <div className="mb-4 mt-2 w-full max-w-sm lg:max-w-md xl:max-w-lg">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Link to={`/profile/${user._id}`}>
@@ -143,13 +155,16 @@ const Post = ({ post }) => {
             <MoreHorizontal className="cursor-pointer" />
           </DialogTrigger>
           <DialogContent className="flex flex-col items-center text-center text-sm">
-            <Button
+            {
+              post?.author?._id !== user?._id && <Button
               variant="ghost"
               className="cursor-pointer w-fit text-[#ED4956] font-bold"
             >
               Unfollow
             </Button>
-            <Button variant="ghost" className="cursor-pointer w-fit">
+            }
+            
+            <Button onClick={handleBookmark} variant="ghost" className="cursor-pointer w-fit">
               Add to favourites
             </Button>
             <Button
@@ -210,7 +225,7 @@ const Post = ({ post }) => {
           />
           <Send className="cursor-pointer hover:text-gray-600" />
         </div>
-        <Bookmark className="cursor-pointer hover:text-gray-600" />
+        <Bookmark onClick={handleBookmark} className="cursor-pointer hover:text-gray-600" />
       </div>
       <span className="font-medium block my-1">{postLike} likes</span>
       <p>

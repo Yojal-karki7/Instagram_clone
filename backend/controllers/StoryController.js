@@ -35,15 +35,21 @@ export const uploadStory = async (req, res) => {
             return res.status(401).json({ success: false, message: "Unauthorized. User ID not found!" });
         }
         const story = new Story({
-            user: req.id,
+            author: req.id,
             mediaUrl: result.secure_url,
             mediaType: mimetype.startsWith("video") ? "video" : "image"
         });
 
+        console.log({
+            author: req.id, 
+            mediaUrl: result.secure_url,
+            mediaType: mimetype.startsWith("video") ? "video" : "image"
+        });
         const savedStory = await story.save();
         console.log("Saving Story - User ID:", req.id);
+        console.log("Saved Story:", savedStory);
 
-        if (!savedStory.mediaUrl || !savedStory.mediaType || !savedStory.user) {
+        if (!savedStory.mediaUrl || !savedStory.mediaType || !savedStory.author) {
             return res.status(500).json({ success: false, message: "Story data not saved correctly!" });
         }
 
@@ -77,12 +83,11 @@ export const getStories = async (req, res) => {
 
         // Fetch stories from followed users, only within the last 24 hours
         const stories = await Story.find({ 
-            user: { $in: user.following }, 
+            author: { $in: user.following }, // ✅ Fixed this line
             createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } 
-        })
-        .populate('author', 'username profilePicture')
-        .populate('viewedBy', 'username profilePicture') // Populate viewers
-        .sort({ createdAt: -1 }); // Sort by latest stories first
+        }).populate('author', 'username profilePicture')
+        .populate('viewedBy', 'username profilePicture')
+        .sort({ createdAt: -1 });
 
         res.status(200).json({ success: true, stories });
     } catch (error) {
@@ -124,20 +129,24 @@ export const deleteStory = async (req, res) => {
 export const markStoryAsViewed = async (req, res) => {
     try {
         const { storyId } = req.params;
+        const userId = req.id; // Extracted from `isAuthenticated` middleware
+
         const story = await Story.findById(storyId);
 
         if (!story) {
-            return res.status(404).json({ success: false, message: 'Story not found' });
+            return res.status(404).json({ success: false, message: "Story not found" });
         }
-        
-        if (!story.viewedBy.includes(req.id)) { // Changed to match isAuthenticated middleware
-            story.viewedBy.push(req.id);
+
+        // Check if user has already viewed the story
+        if (!story.viewedBy.some(id => id.toString() === userId)) {
+            story.viewedBy.push(userId);
             await story.save();
         }
-        
-        const updatedStory = await Story.findById(storyId).populate('viewedBy', 'username profilePicture');
-        
-        res.status(200).json({ success: true, message: 'Story marked as viewed', story: updatedStory });
+
+        // Return updated story with viewedBy users populated
+        const updatedStory = await Story.findById(storyId).populate("viewedBy", "username profilePicture");
+
+        res.status(200).json({ success: true, message: "Story marked as viewed", story: updatedStory });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

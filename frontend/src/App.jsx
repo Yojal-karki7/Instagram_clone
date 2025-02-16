@@ -15,31 +15,32 @@ import { setSocket } from "./store/socketSlice";
 import { setOnlineUsers } from "./store/chatSlice";
 import useGetAllMessages from "./hooks/useGetAllMessages";
 import { setLikeNotification, setMessageNotification } from "./store/rtnSlice";
+import ProtectedRoutes from "./components/ProtectedRoutes";
 
 const browserRouter = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
+    element: <ProtectedRoutes><MainLayout /></ProtectedRoutes>,
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: <ProtectedRoutes><Home /></ProtectedRoutes>,
       },
       {
         path: "/profile/:id",
-        element: <Profile />,
+        element: <ProtectedRoutes><Profile /></ProtectedRoutes>,
       },
       {
         path: "/post/:id",
-        element: <SinglePost />,
+        element: <ProtectedRoutes><SinglePost /></ProtectedRoutes>,
       },
       {
         path: "/account/edit",
-        element: <EditProfile />,
+        element: <ProtectedRoutes><EditProfile /></ProtectedRoutes>,
       },
       {
         path: "/chat",
-        element: <ChatPage />,
+        element: <ProtectedRoutes><ChatPage /></ProtectedRoutes>,
       },
     ],
   },

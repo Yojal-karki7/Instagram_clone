@@ -1,12 +1,12 @@
 import { Label } from "@radix-ui/react-label";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { toast } from "sonner";
 import { Loader } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAuthUser } from "@/store/authSlice";
 
 const Login = () => {
@@ -15,6 +15,7 @@ const Login = () => {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const {user} = useSelector(store => store.auth)
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
@@ -52,6 +53,11 @@ const Login = () => {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    if(user) {
+      navigate('/')
+    }
+  }, [])
 
   return (
     <div className="flex items-center w-screen h-screen justify-center">

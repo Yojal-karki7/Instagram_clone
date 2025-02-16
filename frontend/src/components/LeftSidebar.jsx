@@ -18,7 +18,7 @@ import CreatePost from "./CreatePost";
 import { setPosts, setSelectedPost } from "@/store/postSlice";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
-import { clearNotifications } from "@/store/rtnSlice";
+import { clearLikeNotifications, clearMessageNotifications } from "@/store/rtnSlice";
 
 const LeftSidebar = () => {
   const navigate = useNavigate();
@@ -29,11 +29,6 @@ const LeftSidebar = () => {
   const messageNotification = useSelector(
     (state) => state.realTimeNotification.messageNotification.filter(noti => noti.type) // ✅ Filter out non-message objects
   ) || [];
-  console.log("Like Notifications:", JSON.stringify(likeNotification, null, 2));
-  console.log(
-    "Message Notifications:",
-    JSON.stringify(messageNotification, null, 2)
-  );
 
   const dispatch = useDispatch();
   const [openCreatePost, setOpenCreatePost] = useState(false);
@@ -111,9 +106,16 @@ const LeftSidebar = () => {
       text: "Logout",
     },
   ];
-  const handleClearNotifications = () => {
-    dispatch(clearNotifications());
-  };
+  const handleClearLikeNoti = () => {
+    setTimeout(() => {
+      dispatch(clearLikeNotifications())
+    }, 5000);
+  }
+  const handleClearMessageNoti = () => {
+    setTimeout(() => {
+      dispatch(clearMessageNotifications())
+    }, 5000);
+  }
   return (
     <div className="fixed px-4 top-0 z-10 left-0 border-r border-gray-300 hidden sm:block md:w-[20%] h-screen">
       <div className="flex flex-col">
@@ -134,19 +136,12 @@ const LeftSidebar = () => {
                         <Button
                           size="icon"
                           className="rounded-full h-5 w-5 bg-red-600 hover:bg-red-600 absolute bottom-6 left-6"
+                          onClick={handleClearLikeNoti}
                         >
                           {likeNotification.length}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent>
-                        <div>
-                          <button
-                            onClick={handleClearNotifications}
-                            className="p-2 bg-red-500 text-white rounded w-full text-center mb-2"
-                          >
-                            Clear Notifications
-                          </button>
-                        </div>
                         <div>
                           {likeNotification.length === 0 ? (
                             <p>No new notification</p>
@@ -186,6 +181,7 @@ const LeftSidebar = () => {
                         <Button
                           size="icon"
                           className="rounded-full h-5 w-5 bg-blue-600 hover:bg-blue-600 absolute bottom-6 left-6"
+                          onClick={handleClearMessageNoti}
                         >
                           {messageNotification.length}
                         </Button>

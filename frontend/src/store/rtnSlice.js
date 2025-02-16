@@ -30,12 +30,14 @@ const rtnSlice = createSlice({
 
             state.messageNotification.push(...filteredMessages);
         },
-        clearNotifications: (state) => {
+        clearLikeNotifications: (state) => {
             state.likeNotification = [];
-            state.messageNotification = [];
         },
+        clearMessageNotifications(state, action) {
+            state.messageNotification = []
+        }
     },
 });
 
-export const { setLikeNotification, setMessageNotification, clearNotifications } = rtnSlice.actions;
+export const { setLikeNotification, setMessageNotification, clearLikeNotifications, clearMessageNotifications } = rtnSlice.actions;
 export default rtnSlice.reducer;

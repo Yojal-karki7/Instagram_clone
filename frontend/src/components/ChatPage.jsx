@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { setSelectedUser } from "@/store/authSlice";
@@ -14,10 +14,10 @@ const ChatPage = () => {
   const dispatch = useDispatch();
   const { user, selectedUser, userProfile } = useSelector((store) => store.auth);
   const { onlineUsers, messages } = useSelector((store) => store.chat);
+  const [followingUsers, setFollowingUsers] = useState(user?.following || userProfile?.following);
 
-  // Fetching the users that the logged-in user follows
-  const [followingUsers, setfollowingUsers] = useState(user?.following || userProfile?.following);
-  
+  // Ref for scrolling
+  const messagesEndRef = useRef(null);
 
   const handleSendMessage = async (receiverId) => {
     try {
@@ -36,28 +36,34 @@ const ChatPage = () => {
     }
   };
 
-  const handleFollowingUsers = async() => {
+  const handleFollowingUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/v1/user/following', {withCredentials: true});
-      if(response.data.success) {
-        setfollowingUsers(response.data.following)
+      const response = await axios.get('http://localhost:3000/api/v1/user/following', { withCredentials: true });
+      if (response.data.success) {
+        setFollowingUsers(response.data.following);
       }
-      
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
-    handleFollowingUsers()
+    handleFollowingUsers();
     return () => {
       dispatch(setSelectedUser(null));
     };
   }, []);
 
+  // Scroll to the latest message
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
   return (
     <div className="flex sm:ml-[20%] h-screen">
-      {/* Sidebar with List of Following Users */}
+      {/* Sidebar */}
       <section className={`w-full md:w-1/4 py-8 mb-8 ${selectedUser ? "hidden" : "block w-[80px]"} h-[100vh] border-r`}>
         <h1 className="font-bold mb-4 px-3 text-xl hidden sm:block">{user?.username}</h1>
         <hr className="border-gray-300" />
@@ -100,12 +106,12 @@ const ChatPage = () => {
             </Avatar>
             <div className="flex items-center w-full justify-between">
               <span>{selectedUser?.username}</span>
-              <Button onClick={() => dispatch(setSelectedUser(null))} variant="secondary" className="block sm:hidden">
+              <Button onClick={() => dispatch(setSelectedUser(null))} variant="secondary">
                 <X size={24} />
               </Button>
             </div>
           </div>
-          <Messages selectedUser={selectedUser} />
+          <Messages selectedUser={selectedUser} messagesEndRef={messagesEndRef} />
           <div className="flex items-center p-4">
             <Input
               value={textMessage}
